@@ -157,6 +157,18 @@
     }
 
     /**
+     * Get a function that answers if the {LoggerLevel} will output anything for an instance's currently
+     * enabled {LoggerLevel}.
+     *
+     * @return {boolean}
+     */
+    function getIsLevelEnabledFunction(loggerLevel) {
+        return function () {
+            return loggerLevel >= this.level();
+        };
+    }
+
+    /**
      * A {Logger} permits you to log messages  of many types directly to the console with fine-grained
      * control.
      *
@@ -303,9 +315,12 @@
         // Generate logging functions for all available LoggerLevels.
         for (property in Logger) {
             if (Logger.hasOwnProperty(property) && Logger[property] instanceof LoggerLevel) {
-                if (!Logger.hasOwnProperty(property.toLowerCase())) {
-                    Logger.prototype[property.toLowerCase()] = makeLoggingFunction(Logger[property], false);
-                    Logger.prototype['v' + property.toLowerCase()] = makeLoggingFunction(Logger[property], true);
+                var lowercaseProperty = property.toLowerCase();
+
+                if (!Logger.hasOwnProperty(lowercaseProperty)) {
+                    Logger.prototype[lowercaseProperty] = makeLoggingFunction(Logger[property], false);
+                    Logger.prototype['v' + lowercaseProperty] = makeLoggingFunction(Logger[property], true);
+                    Logger.prototype['is' + lowercaseProperty[0].toUpperCase() + lowercaseProperty.substr(1) + 'Enabled'] = getIsLevelEnabledFunction(Logger[property]);
                 }
             }
         }
@@ -510,7 +525,7 @@
 
     // Setup.
     Logger.config({masterLevel: Logger.TRACE});
-    Logger.version = '0.1.0';
+    Logger.version = '0.2.0';
 
     // Expose.
     window.Logger = Logger;

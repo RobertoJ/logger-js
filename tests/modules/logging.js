@@ -35,8 +35,6 @@ define(function () {
         // === //
 
         test('Standard logging.', function () {
-            expect(4);
-
             // Ensure a self reference is returned.
             ok(instance.setLevel(level)[shortName](MESSAGE) === instance, protoName + ' returns a self reference.');
             ok(cache[0][1] === MESSAGE, protoName + ' logs messages.');
@@ -48,6 +46,20 @@ define(function () {
             // Ensure that the instance does not log when disabled.
             instance.disable()[shortName](MESSAGE).enable();
             ok(cache[2] === undefined, protoName + ' does not log when the instance is disabled.');
+        });
+
+        // === //
+
+        test('All Logger.prototype.is{Level}Enabled functions return true when greater than or equal to ' + level.name() + '.', function () {
+            expect(levelsToTest.length);
+
+            instance.setLevel(level);
+            levelsToTest.forEach(function (currentLevel) {
+                var isLevelEnabledName = 'is' + currentLevel.name()[0].toUpperCase() + currentLevel.name().substr(1).toLowerCase() + 'Enabled';
+                var shouldReturn = currentLevel >= level;
+
+                ok(instance[isLevelEnabledName]() === shouldReturn, 'Logger.prototype.' + isLevelEnabledName + ' returns ' + shouldReturn);
+            });
         });
 
         // === //
